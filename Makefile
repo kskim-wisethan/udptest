@@ -10,3 +10,5 @@ linux_udpsender.o: linux_udpsender.cpp
 linux_udpreceiver.o: linux_udpreceiver.cpp
 	    g++ -c linux_udpreceiver.cpp
 
+clean: 
+	    rm -f $@ main.o linux_udpsender.o linux_udpreceiver.o

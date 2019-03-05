@@ -18,7 +18,7 @@ public:
     bool isWaiting() { return m_waiting_flag; }
     void stop_waiting() { m_waiting_flag = false; }
 
-    size_t getSize() { return m_readlen; }
+    int getSize() { return m_readlen; }
 
 private:
     void run();

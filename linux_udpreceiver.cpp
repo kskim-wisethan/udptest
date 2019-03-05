@@ -1,8 +1,5 @@
 #include "linux_udpreceiver.h"
 
-#ifdef WIN32
-#else
-
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -14,19 +11,14 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include <icd/icdparser.h>
 
-
-Linux_UDPReceiver::Linux_UDPReceiver(QObject *parent)
-    : QThread(parent),
-      m_waiting_flag(false),
+Linux_UDPReceiver::Linux_UDPReceiver()
+    : m_waiting_flag(false),
       m_readlen(0),
       m_socket(0)
 {
-    this->setTerminationEnabled(true);
-
-    m_icd_parser = std::shared_ptr<ICDParser>(new ICDParser());
 }
+
 Linux_UDPReceiver::~Linux_UDPReceiver()
 {
     if (m_socket != 0) {
@@ -85,31 +77,10 @@ int Linux_UDPReceiver::wait_data()
             m_readlen = ret;
             printf("received data: %d\n", m_readlen);
 
-            m_icd_parser->init(recvbuf, ret);
-            unsigned int opcode = m_icd_parser->getOpcode();
+            //m_icd_parser->init(recvbuf, ret);
+            //unsigned int opcode = m_icd_parser->getOpcode();
 
-            emit readReady(opcode);
-        }
-    }
-
-    return ret;
-}
-
-int Linux_UDPReceiver::recv_data()
-{
-    int ret = 0;
-    m_waiting_flag = true;
-
-    char recvbuf[DEFAULT_BUFLEN] = {0, };
-    int buflen = DEFAULT_BUFLEN;
-
-    while (m_waiting_flag) {
-        ret = recvfrom(m_socket, recvbuf, buflen, 0, NULL, NULL);
-        if (ret > 0) {
-            printf("received data: %d\n", m_readlen);
-            m_readlen = ret;
-
-            m_icd_parser->init(recvbuf, ret);
+            //emit readReady(opcode);
         }
     }
 
@@ -132,5 +103,3 @@ void Linux_UDPReceiver::run()
 {
     int ret = wait_data();
 }
-
-#endif
