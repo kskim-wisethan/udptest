@@ -52,7 +52,6 @@ int Linux_UDPSender::init_socket(const string& ip, unsigned short port, int type
     memset(&m_recvaddr, 0, sizeof(m_recvaddr));
     m_recvaddr.sin_family = AF_INET;
     m_recvaddr.sin_port = htons(port);
-    m_recvaddr.sin_addr.s_addr = htonl(INADDR_ANY);
     if (((m_recvaddr.sin_addr.s_addr = inet_addr(ip.c_str())) == 0)) {
         printf("[ERROR] Linux_UDPSender::init_socket() invalid address.\n");
         return -1;

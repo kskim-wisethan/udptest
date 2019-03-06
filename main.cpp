@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
     }
 
     Linux_UDPSender* sender = new Linux_UDPSender();
-    int ret = sender->init_socket(strIP, port);
+    int ret = sender->init_socket(strIP, port, type);
     if (ret != 0) {
         return ret;
     }

@@ -91,12 +91,8 @@ int Linux_UDPReceiver::wait_data()
     int buflen = DEFAULT_BUFLEN;
 
     while (m_waiting_flag) {
-        if (m_type == BROADCAST) {
-            ret = recvfrom(m_socket, recvbuf, buflen, 0, NULL, NULL);
-        } else {
-            int addrlen = sizeof(m_recvaddr);
-            ret = recvfrom(m_socket, recvbuf, buflen, 0, (struct sockaddr*)&m_recvaddr, (socklen_t*)&addrlen);
-        }
+        int addrlen = sizeof(m_recvaddr);
+        ret = recvfrom(m_socket, recvbuf, buflen, 0, (struct sockaddr*)&m_recvaddr, (socklen_t*)&addrlen);
 
         if (ret > 0) {
             m_readlen = ret;
