@@ -16,9 +16,13 @@ using namespace std;
 
 void* UDPReceiverFunc(void* arg)
 {
-    int port = *((int*)arg);
+    char** argv = (char**)arg;
+
+    string strIP = argv[1];
+    int port = atoi(argv[2]);
+
     Linux_UDPReceiver* receiver = new Linux_UDPReceiver();
-    int ret = receiver->init_socket(port);
+    int ret = receiver->init_socket(strIP, port);
     if (ret != 0) {
         return NULL;
     }
@@ -49,7 +53,7 @@ int main(int argc, char* argv[])
     }
     
     pthread_t hUDPReceiverThread = 0;
-    int thread_ret = pthread_create(&hUDPReceiverThread, NULL, &UDPReceiverFunc, (void*)&port);
+    int thread_ret = pthread_create(&hUDPReceiverThread, NULL, &UDPReceiverFunc, (void*)argv);
     if (thread_ret == 0) {
         printf("Receiver thread created..\n");
     } else {

@@ -30,7 +30,7 @@ Linux_UDPReceiver::~Linux_UDPReceiver()
     }
 }
 
-int Linux_UDPReceiver::init_socket(unsigned short port, bool broadcast)
+int Linux_UDPReceiver::init_socket(const std::string& ip, unsigned short port, UDP_TYPE type)
 {
     int ret = 0;
 
@@ -39,10 +39,18 @@ int Linux_UDPReceiver::init_socket(unsigned short port, bool broadcast)
         return -1;
     }
 
-    if (broadcast) {
+    if (type == MULTICAST) {
+        int multicast_permission = 1;
+        if (setsockopt(m_socket, SOL_SOCKET, SO_REUSEADDR, (void*)&multicast_permission, sizeof(multicast_permission)) < 0) {
+            printf("[ERROR] Linux_UDPReceiver::init_socket() setsockopt 1 failed.\n");
+            close(m_socket);
+            return -1;
+        }
+
+    } else if (type == BROADCAST) {
         int broadcast_permission = 1;
         if (setsockopt(m_socket, SOL_SOCKET, SO_BROADCAST, (void*)&broadcast_permission, sizeof(broadcast_permission)) < 0) {
-            printf("[ERROR] Linux_UDPReceiver::init_socket() setsockopt failed.\n");
+            printf("[ERROR] Linux_UDPReceiver::init_socket() setsockopt 1 failed.\n");
             close(m_socket);
             return -1;
         }
@@ -58,6 +66,17 @@ int Linux_UDPReceiver::init_socket(unsigned short port, bool broadcast)
         printf("[ERROR] Linux_UDPReceiver::init_socket() bind failed.\n");
         close(m_socket);
         return -1;
+    }
+
+    if (type == MULTICAST) {
+        struct ip_mreq mreq;
+        mreq.imr_multiaddr.s_addr = inet_addr(ip.c_str());
+        mreq.imr_interface.s_addr = htonl(INADDR_ANY);
+        if (setsockopt(m_socket, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) < 0) {
+            printf("[ERROR] Linux_UDPReceiver::init_socket() setsockopt 2 failed.\n");
+            close(m_socket);
+            return -1;
+        }
     }
 
     return ret;

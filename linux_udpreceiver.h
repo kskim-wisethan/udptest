@@ -2,6 +2,7 @@
 #define LINUX_UDPRECEIVER_H
 
 #include <memory>
+#include <string>
 
 #define DEFAULT_BUFLEN      4096
 
@@ -9,10 +10,17 @@
 class Linux_UDPReceiver
 {
 public:
+    enum UDP_TYPE {
+        UNICAST,
+        MULTICAST,
+        BROADCAST
+    };
+
+public:
     Linux_UDPReceiver();
     ~Linux_UDPReceiver();
 
-    int init_socket(unsigned short port, bool broadcast = true);
+    int init_socket(const std::string& ip, unsigned short port, UDP_TYPE type = UNICAST);
     int wait_data();
     int close_socket();
     bool isWaiting() { return m_waiting_flag; }
