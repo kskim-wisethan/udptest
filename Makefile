@@ -1,5 +1,9 @@
-udptest: main.o linux_udpsender.o linux_udpreceiver.o
-	      g++ -lpthread -o $@ main.o linux_udpsender.o linux_udpreceiver.o
+TARGET = udptest
+OBJS = main.o linux_udpsender.o linux_udpreceiver.o
+CC = -lpthread
+
+$(TARGET): $(OBJS)
+	     g++ -o $@ main.o linux_udpsender.o linux_udpreceiver.o $(CC) 
 
 main.o: main.cpp
 	    g++ -c main.cpp
@@ -11,4 +15,4 @@ linux_udpreceiver.o: linux_udpreceiver.cpp
 	    g++ -c linux_udpreceiver.cpp
 
 clean: 
-	    rm -f $@ main.o linux_udpsender.o linux_udpreceiver.o
+	    rm -f $(TARGET) $(OBJS)
