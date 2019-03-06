@@ -8,14 +8,14 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
 
 
 Linux_UDPReceiver::Linux_UDPReceiver()
     : m_waiting_flag(false),
       m_readlen(0),
-      m_socket(0)
+      m_socket(0),
+      m_type(0)
 {
 }
 
@@ -33,6 +33,7 @@ Linux_UDPReceiver::~Linux_UDPReceiver()
 int Linux_UDPReceiver::init_socket(const std::string& ip, unsigned short port, int type)
 {
     int ret = 0;
+    m_type = type; 
 
     if ((m_socket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) <= 0) {
         printf("[ERROR] Linux_UDPReceiver::init_socket() rt_dev_socket failed.\n");
@@ -56,13 +57,12 @@ int Linux_UDPReceiver::init_socket(const std::string& ip, unsigned short port, i
         }
     }
 
-    struct sockaddr_in recvaddr;
-    memset(&recvaddr, 0, sizeof(recvaddr));
-    recvaddr.sin_family = AF_INET;
-    recvaddr.sin_port = htons(port);
-    recvaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    memset(&m_recvaddr, 0, sizeof(m_recvaddr));
+    m_recvaddr.sin_family = AF_INET;
+    m_recvaddr.sin_port = htons(port);
+    m_recvaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    if (bind(m_socket, (struct sockaddr*)&recvaddr, sizeof(recvaddr)) < 0) {
+    if (bind(m_socket, (struct sockaddr*)&m_recvaddr, sizeof(m_recvaddr)) < 0) {
         printf("[ERROR] Linux_UDPReceiver::init_socket() bind failed.\n");
         close(m_socket);
         return -1;
@@ -91,7 +91,13 @@ int Linux_UDPReceiver::wait_data()
     int buflen = DEFAULT_BUFLEN;
 
     while (m_waiting_flag) {
-        ret = recvfrom(m_socket, recvbuf, buflen, 0, NULL, NULL);
+        if (m_type == BROADCAST) {
+            ret = recvfrom(m_socket, recvbuf, buflen, 0, NULL, NULL);
+        } else {
+            int addrlen = sizeof(m_recvaddr);
+            ret = recvfrom(m_socket, recvbuf, buflen, 0, (struct sockaddr*)&m_recvaddr, (socklen_t*)&addrlen);
+        }
+
         if (ret > 0) {
             m_readlen = ret;
             recvbuf[m_readlen] = '\0';

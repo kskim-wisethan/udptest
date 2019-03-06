@@ -1,6 +1,7 @@
 ﻿#ifndef LINUX_UDPRECEIVER_H
 #define LINUX_UDPRECEIVER_H
 
+#include <netinet/in.h>
 #include <memory>
 #include <string>
 
@@ -35,6 +36,8 @@ private:
     bool m_waiting_flag;
     int m_socket;
     int m_readlen;
+    int m_type;
+    struct sockaddr_in m_recvaddr;
 };
 
 #endif // LINUX_UDPRECEIVER_H
