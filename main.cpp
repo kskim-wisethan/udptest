@@ -62,10 +62,18 @@ int main(int argc, char* argv[])
         return 2;
     }
 
+    cout << ">> " << endl;
     string strInput = "";
+    char buffer[INPUT_BUFLEN] = {0, };
     while (1) {
-        cout << "> ";
-        cin >> strInput;
+        char ch = 0;
+        int i = 0;
+        while (ch != '\n') {
+            ch = getchar();
+            buffer[i++] = ch;
+        }
+        buffer[i - 1] = '\0';
+        strInput = string(buffer, i - 1);
 
         if (strInput.compare("exit") == 0) {
             break;
@@ -73,6 +81,7 @@ int main(int argc, char* argv[])
         sender->send_data(strInput.c_str(), strInput.length());
         usleep(0);
     }
+    cout << "<< " << endl;
 
     sender->close_socket();
 
