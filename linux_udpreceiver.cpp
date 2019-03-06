@@ -69,16 +69,6 @@ int Linux_UDPReceiver::init_socket(const std::string& ip, unsigned short port, i
     }
 
     if (type == MULTICAST) {
-        int multicast_permission = 1;
-        if (setsockopt(m_socket, IPPROTO_IP, IP_MULTICAST_LOOP, (void*)&multicast_permission, sizeof(multicast_permission)) < 0) {
-            printf("[ERROR] Linux_UDPReceiver::init_socket() setsockopt 2 failed.\n");
-            close(m_socket);
-            return -1;
-        }
-
-    }
-
-    if (type == MULTICAST) {
         struct ip_mreq mreq;
         mreq.imr_multiaddr.s_addr = inet_addr(ip.c_str());
         mreq.imr_interface.s_addr = htonl(INADDR_ANY);
