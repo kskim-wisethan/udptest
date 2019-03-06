@@ -31,7 +31,7 @@ Linux_UDPSender::~Linux_UDPSender()
     }
 }
 
-int Linux_UDPSender::init_socket(const string& ip, unsigned short port, bool broadcast)
+int Linux_UDPSender::init_socket(const string& ip, unsigned short port, int type)
 {
     int ret = 0;
 
@@ -40,7 +40,15 @@ int Linux_UDPSender::init_socket(const string& ip, unsigned short port, bool bro
         return -1;
     }
 
-    if (broadcast) {
+    if (type == MULTICAST) {
+        int multicast_permission = 1;
+        if (setsockopt(m_socket, IPPROTO_IP, IP_MULTICAST_TTL, (void*)&multicast_permission, sizeof(multicast_permission)) < 0) {
+            printf("[ERROR] Linux_UDPReceiver::init_socket() setsockopt 1 failed.\n");
+            close(m_socket);
+            return -1;
+        }
+
+    } else if (type == BROADCAST) {
         int broadcast_permission = 1;
         if (setsockopt(m_socket, SOL_SOCKET, SO_BROADCAST, (void*)&broadcast_permission, sizeof(broadcast_permission)) < 0) {
             printf("[ERROR] Linux_UDPSender::init_socket() setsockopt failed.\n");

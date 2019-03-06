@@ -10,10 +10,17 @@
 class Linux_UDPSender
 {
 public:
+    enum UDP_TYPE {
+        UNICAST = 1,
+        MULTICAST,
+        BROADCAST
+    };
+
+public:
     Linux_UDPSender();
     ~Linux_UDPSender();
 
-    int init_socket(const std::string& ip, unsigned short port, bool broadcast = true);
+    int init_socket(const std::string& ip, unsigned short port, int type = UNICAST);
     int send_data(const char* buf, int len);
     int close_socket();
 

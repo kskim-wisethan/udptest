@@ -16,16 +16,7 @@ using namespace std;
 
 void* UDPReceiverFunc(void* arg)
 {
-    char** argv = (char**)arg;
-
-    string strIP = argv[1];
-    int port = atoi(argv[2]);
-
-    Linux_UDPReceiver* receiver = new Linux_UDPReceiver();
-    int ret = receiver->init_socket(strIP, port);
-    if (ret != 0) {
-        return NULL;
-    }
+    Linux_UDPReceiver* receiver = (Linux_UDPReceiver*)arg;
 
     receiver->wait_data();
     receiver->close_socket();
@@ -35,8 +26,8 @@ void* UDPReceiverFunc(void* arg)
 
 int main(int argc, char* argv[])
 {
-    if (argc != 3) {
-        printf("usage: udptest <ip> <port>\n");
+    if (argc < 3) {
+        printf("usage: udptest <ip> <port> <uni|multi|broad>\n");
         printf("e.g.,  udptest 192.168.10.128 18000\n");
         return 1;
     }
@@ -44,16 +35,32 @@ int main(int argc, char* argv[])
     string strName = argv[0];
     string strIP = argv[1];
     int port = atoi(argv[2]);
+    int type = -1;
+    if (argc == 4) {
+        string strType = argv[3];
+        if (strType.compare("uni") == 0) {
+            type = 1;
+        } else if (strType.compare("multi") == 0) {
+            type = 2;
+        } else if (strType.compare("broad") == 0) {
+            type = 3;
+        }
+    }
 
     Linux_UDPSender* sender = new Linux_UDPSender();
-
     int ret = sender->init_socket(strIP, port);
     if (ret != 0) {
         return ret;
     }
     
+    Linux_UDPReceiver* receiver = new Linux_UDPReceiver();
+    ret = receiver->init_socket(strIP, port, type);
+    if (ret != 0) {
+        return ret;
+    }
+    
     pthread_t hUDPReceiverThread = 0;
-    int thread_ret = pthread_create(&hUDPReceiverThread, NULL, &UDPReceiverFunc, (void*)argv);
+    int thread_ret = pthread_create(&hUDPReceiverThread, NULL, &UDPReceiverFunc, (void*)receiver);
     if (thread_ret == 0) {
         printf("Receiver thread created..\n");
     } else {

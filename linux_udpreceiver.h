@@ -11,7 +11,7 @@ class Linux_UDPReceiver
 {
 public:
     enum UDP_TYPE {
-        UNICAST,
+        UNICAST = 1,
         MULTICAST,
         BROADCAST
     };
@@ -20,7 +20,7 @@ public:
     Linux_UDPReceiver();
     ~Linux_UDPReceiver();
 
-    int init_socket(const std::string& ip, unsigned short port, UDP_TYPE type = UNICAST);
+    int init_socket(const std::string& ip, unsigned short port, int type = UNICAST);
     int wait_data();
     int close_socket();
     bool isWaiting() { return m_waiting_flag; }
