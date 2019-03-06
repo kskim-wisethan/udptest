@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <unistd.h>
 #include <iostream>
 #include <string>
 #include <memory>
@@ -8,6 +9,8 @@
 #include "linux_udpsender.h"
 #include "linux_udpreceiver.h"
 #include "netAddrInfo.h"
+
+#define INPUT_BUFLEN      4096
 
 using namespace std;
 
@@ -55,7 +58,6 @@ int main(int argc, char* argv[])
         return 2;
     }
 
-
     string strInput = "";
     while (1) {
         cout << "> ";
@@ -64,8 +66,8 @@ int main(int argc, char* argv[])
         if (strInput.compare("exit") == 0) {
             break;
         }
-
         sender->send_data(strInput.c_str(), strInput.length());
+        usleep(0);
     }
 
     sender->close_socket();

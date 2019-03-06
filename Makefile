@@ -3,7 +3,7 @@ OBJS = main.o linux_udpsender.o linux_udpreceiver.o
 CC = -lpthread
 
 $(TARGET): $(OBJS)
-	     g++ -o $@ main.o linux_udpsender.o linux_udpreceiver.o $(CC) 
+	     g++ -o $@ main.o linux_udpsender.o linux_udpreceiver.o $(CC)
 
 main.o: main.cpp
 	    g++ -c main.cpp
