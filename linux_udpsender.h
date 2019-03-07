@@ -5,6 +5,7 @@
 #include <string>
 
 #define DEFAULT_BUFLEN      4096
+#define DEFAULT_TTL         64
 
 
 class Linux_UDPSender

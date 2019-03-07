@@ -40,7 +40,14 @@ int Linux_UDPSender::init_socket(const string& ip, unsigned short port, int type
         return -1;
     }
 
-    if (type == BROADCAST) {
+    if (type == MULTICAST) {
+        int multicast_ttl = DEFAULT_TTL;
+        if (setsockopt(m_socket, IPPROTO_IP, IP_MULTICAST_TTL, (void*)&multicast_ttl, sizeof(multicast_ttl)) < 0) {
+            printf("[ERROR] Linux_UDPSender::init_socket() setsockopt failed.\n");
+            close(m_socket);
+            return -1;
+        }
+    } else if (type == BROADCAST) {
         int broadcast_permission = 1;
         if (setsockopt(m_socket, SOL_SOCKET, SO_BROADCAST, (void*)&broadcast_permission, sizeof(broadcast_permission)) < 0) {
             printf("[ERROR] Linux_UDPSender::init_socket() setsockopt failed.\n");
