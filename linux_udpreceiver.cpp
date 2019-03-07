@@ -36,7 +36,7 @@ int Linux_UDPReceiver::init_socket(const std::string& ip, unsigned short port, i
     m_type = type; 
 
     if ((m_socket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) <= 0) {
-        printf("[ERROR] Linux_UDPReceiver::init_socket() rt_dev_socket failed.\n");
+        printf("[ERROR] Linux_UDPReceiver::init_socket() socket failed.\n");
         return -1;
     }
 
