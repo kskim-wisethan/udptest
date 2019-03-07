@@ -70,7 +70,10 @@ int Linux_UDPReceiver::init_socket(const std::string& ip, unsigned short port, i
 
     if (type == MULTICAST) {
         struct ip_mreq mreq;
-        mreq.imr_multiaddr.s_addr = inet_addr(ip.c_str());
+        char szGroupIP[64] = {0, };
+        memcpy(szGroupIP, (const void*)(ip.c_str()), (size_t)(ip.length()));
+        printf("group addr: %s %s\n", szGroupIP, ip.c_str());
+        mreq.imr_multiaddr.s_addr = inet_addr(szGroupIP);
         mreq.imr_interface.s_addr = htonl(INADDR_ANY);
         if (setsockopt(m_socket, IPPROTO_IP, IP_ADD_MEMBERSHIP, (void*)&mreq, sizeof(mreq)) < 0) {
             printf("[ERROR] Linux_UDPReceiver::init_socket() setsockopt 3 failed.\n");
@@ -98,6 +101,14 @@ int Linux_UDPReceiver::wait_data()
             m_readlen = ret;
             recvbuf[m_readlen] = '\0';
             printf("[%s:%d]: %s (%d)\n", inet_ntoa(m_recvaddr.sin_addr), ntohs(m_recvaddr.sin_port), recvbuf, m_readlen);
+
+            for (int i = 0; i < m_readlen; i++) {
+                if ((i) % 8 == 0 && i != 0) {
+                    printf("\n");
+                }
+                printf("0x%02X(%d) ", recvbuf[i], recvbuf[i]);
+            }
+            printf("\n");
         }
     }
 
