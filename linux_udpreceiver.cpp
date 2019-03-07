@@ -51,7 +51,7 @@ int Linux_UDPReceiver::init_socket(const std::string& ip, unsigned short port, i
     } else if (type == BROADCAST) {
         int broadcast_permission = 1;
         if (setsockopt(m_socket, SOL_SOCKET, SO_BROADCAST, (void*)&broadcast_permission, sizeof(broadcast_permission)) < 0) {
-            printf("[ERROR] Linux_UDPReceiver::init_socket() setsockopt 1 failed.\n");
+            printf("[ERROR] Linux_UDPReceiver::init_socket() setsockopt 2 failed.\n");
             close(m_socket);
             return -1;
         }
@@ -60,7 +60,6 @@ int Linux_UDPReceiver::init_socket(const std::string& ip, unsigned short port, i
     memset(&m_recvaddr, 0, sizeof(m_recvaddr));
     m_recvaddr.sin_family = AF_INET;
     m_recvaddr.sin_port = htons(port);
-    printf("==== port: %d %d\n", port, htons(port));
     m_recvaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
     if (bind(m_socket, (struct sockaddr*)&m_recvaddr, sizeof(m_recvaddr)) < 0) {
@@ -98,7 +97,7 @@ int Linux_UDPReceiver::wait_data()
         if (ret > 0) {
             m_readlen = ret;
             recvbuf[m_readlen] = '\0';
-            printf("[%s:%d, %d]: %s (%d)\n", inet_ntoa(m_recvaddr.sin_addr), m_recvaddr.sin_port, ntohs(m_recvaddr.sin_port), recvbuf, m_readlen);
+            printf("[%s:%d]: %s (%d)\n", inet_ntoa(m_recvaddr.sin_addr), ntohs(m_recvaddr.sin_port), recvbuf, m_readlen);
         }
     }
 

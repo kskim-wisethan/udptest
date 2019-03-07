@@ -13,7 +13,7 @@ class Linux_UDPReceiver
 public:
     enum UDP_TYPE {
         UNICAST = 1,
-        MULTICAST,
+        MULTICAST,      // class D (224.0.0.0 ~ 239.255.255.255)
         BROADCAST
     };
 

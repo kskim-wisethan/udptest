@@ -36,7 +36,7 @@ int Linux_UDPSender::init_socket(const string& ip, unsigned short port, int type
     int ret = 0;
 
     if ((m_socket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) <= 0) {
-        printf("[ERROR] Linux_UDPSender::init_socket() rt_dev_socket failed.\n");
+        printf("[ERROR] Linux_UDPSender::init_socket() socket failed.\n");
         return -1;
     }
 
@@ -66,7 +66,7 @@ int Linux_UDPSender::send_data(const char* buf, int len)
 
     ret = sendto(m_socket, buf, len, 0, (const struct sockaddr *)&m_recvaddr, sizeof(m_recvaddr));
     if (ret < 0) {
-        printf("[ERROR] Linux_UDPSender::send_data() rt_dev_sendto failed.\n");
+        printf("[ERROR] Linux_UDPSender::send_data() sendto failed.\n");
     }
 
     return ret;
