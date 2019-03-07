@@ -60,6 +60,7 @@ int Linux_UDPReceiver::init_socket(const std::string& ip, unsigned short port, i
     memset(&m_recvaddr, 0, sizeof(m_recvaddr));
     m_recvaddr.sin_family = AF_INET;
     m_recvaddr.sin_port = htons(port);
+    printf("==== port: %d %d\n", port, htons(port));
     m_recvaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
     if (bind(m_socket, (struct sockaddr*)&m_recvaddr, sizeof(m_recvaddr)) < 0) {
@@ -97,12 +98,7 @@ int Linux_UDPReceiver::wait_data()
         if (ret > 0) {
             m_readlen = ret;
             recvbuf[m_readlen] = '\0';
-            printf("received data: %s (%d)\n", recvbuf, m_readlen);
-
-            //m_icd_parser->init(recvbuf, ret);
-            //unsigned int opcode = m_icd_parser->getOpcode();
-
-            //emit readReady(opcode);
+            printf("[%s:%d, %d]: %s (%d)\n", inet_ntoa(m_recvaddr.sin_addr), m_recvaddr.sin_port, ntohs(m_recvaddr.sin_port), recvbuf, m_readlen);
         }
     }
 
