@@ -18,10 +18,11 @@ public:
     };
 
 public:
-    Linux_UDPReceiver();
+    Linux_UDPReceiver(const std::string& ip, unsigned short port, int type = UNICAST, const std::string& name = "");
+    Linux_UDPReceiver(const char* ip, unsigned short port, int type = UNICAST, const std::string& name = "");
     ~Linux_UDPReceiver();
 
-    int init_socket(const std::string& ip, unsigned short port, int type = UNICAST);
+    int init_socket();
     int wait_data();
     int close_socket();
     bool isWaiting() { return m_waiting_flag; }
@@ -37,6 +38,9 @@ private:
     int m_socket;
     int m_readlen;
     int m_type;
+    std::string m_ip;
+    std::string m_name;
+    unsigned short m_port;
     struct sockaddr_in m_recvaddr;
 };
 

@@ -10,12 +10,27 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
+using namespace std;
 
-Linux_UDPReceiver::Linux_UDPReceiver()
+Linux_UDPReceiver::Linux_UDPReceiver(const string& ip, unsigned short port, int type, const string& name)
     : m_waiting_flag(false),
       m_readlen(0),
       m_socket(0),
-      m_type(0)
+      m_ip(ip),
+      m_port(port),
+      m_type(type),
+      m_name(name)
+{
+}
+
+Linux_UDPReceiver::Linux_UDPReceiver(const char* ip, unsigned short port, int type, const string& name)
+    : m_waiting_flag(false),
+      m_readlen(0),
+      m_socket(0),
+      m_ip(ip),
+      m_port(port),
+      m_type(type),
+      m_name(name)
 {
 }
 
@@ -30,17 +45,16 @@ Linux_UDPReceiver::~Linux_UDPReceiver()
     }
 }
 
-int Linux_UDPReceiver::init_socket(const std::string& ip, unsigned short port, int type)
+int Linux_UDPReceiver::init_socket()
 {
     int ret = 0;
-    m_type = type; 
 
     if ((m_socket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) <= 0) {
         printf("[ERROR] Linux_UDPReceiver::init_socket() socket failed.\n");
         return -1;
     }
 
-    if (type == MULTICAST) {
+    if (m_type == MULTICAST) {
         int multicast_permission = 1;
         if (setsockopt(m_socket, SOL_SOCKET, SO_REUSEADDR, (void*)&multicast_permission, sizeof(multicast_permission)) < 0) {
             printf("[ERROR] Linux_UDPReceiver::init_socket() setsockopt 1 failed.\n");
@@ -48,7 +62,7 @@ int Linux_UDPReceiver::init_socket(const std::string& ip, unsigned short port, i
             return -1;
         }
 
-    } else if (type == BROADCAST) {
+    } else if (m_type == BROADCAST) {
         int broadcast_permission = 1;
         if (setsockopt(m_socket, SOL_SOCKET, SO_BROADCAST, (void*)&broadcast_permission, sizeof(broadcast_permission)) < 0) {
             printf("[ERROR] Linux_UDPReceiver::init_socket() setsockopt 2 failed.\n");
@@ -59,7 +73,7 @@ int Linux_UDPReceiver::init_socket(const std::string& ip, unsigned short port, i
 
     memset(&m_recvaddr, 0, sizeof(m_recvaddr));
     m_recvaddr.sin_family = AF_INET;
-    m_recvaddr.sin_port = htons(port);
+    m_recvaddr.sin_port = htons(m_port);
     m_recvaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
     if (bind(m_socket, (struct sockaddr*)&m_recvaddr, sizeof(m_recvaddr)) < 0) {
@@ -68,12 +82,9 @@ int Linux_UDPReceiver::init_socket(const std::string& ip, unsigned short port, i
         return -1;
     }
 
-    if (type == MULTICAST) {
+    if (m_type == MULTICAST) {
         struct ip_mreq mreq;
-        char szGroupIP[64] = {0, };
-        memcpy(szGroupIP, (const void*)(ip.c_str()), (size_t)(ip.length()));
-        printf("group addr: %s %s\n", szGroupIP, ip.c_str());
-        mreq.imr_multiaddr.s_addr = inet_addr(szGroupIP);
+        mreq.imr_multiaddr.s_addr = inet_addr(m_ip.c_str()); 
         mreq.imr_interface.s_addr = htonl(INADDR_ANY);
         if (setsockopt(m_socket, IPPROTO_IP, IP_ADD_MEMBERSHIP, (void*)&mreq, sizeof(mreq)) < 0) {
             printf("[ERROR] Linux_UDPReceiver::init_socket() setsockopt 3 failed.\n");
@@ -100,7 +111,7 @@ int Linux_UDPReceiver::wait_data()
         if (ret > 0) {
             m_readlen = ret;
             recvbuf[m_readlen] = '\0';
-            printf("[%s:%d]: %s (%d)\n", inet_ntoa(m_recvaddr.sin_addr), ntohs(m_recvaddr.sin_port), recvbuf, m_readlen);
+            printf("[%s][%s:%d]: %s (%d)\n", m_name.c_str(), inet_ntoa(m_recvaddr.sin_addr), ntohs(m_recvaddr.sin_port), recvbuf, m_readlen);
 
             for (int i = 0; i < m_readlen; i++) {
                 if ((i) % 8 == 0 && i != 0) {

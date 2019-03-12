@@ -18,15 +18,19 @@ public:
     };
 
 public:
-    Linux_UDPSender();
+    Linux_UDPSender(const std::string& ip, unsigned short port, int type = UNICAST);
+    Linux_UDPSender(const char* ip, unsigned short port, int type = UNICAST);
     ~Linux_UDPSender();
 
-    int init_socket(const std::string& ip, unsigned short port, int type = UNICAST);
+    int init_socket();
     int send_data(const char* buf, int len);
     int close_socket();
 
 private:
+    unsigned short m_port;
+    int m_type;
     int m_socket;
+    std::string m_ip;
     struct sockaddr_in m_recvaddr;
 };
 

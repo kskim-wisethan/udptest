@@ -14,10 +14,20 @@
 using namespace std;
 
 
-Linux_UDPSender::Linux_UDPSender()
-    : m_socket(0)
+Linux_UDPSender::Linux_UDPSender(const string& ip, unsigned short port, int type)
+    : m_socket(0),
+      m_ip(ip),
+      m_port(port),
+      m_type(type)
 {
+}
 
+Linux_UDPSender::Linux_UDPSender(const char* ip, unsigned short port, int type)
+    : m_socket(0),
+      m_ip(ip),
+      m_port(port),
+      m_type(type)
+{
 }
 
 Linux_UDPSender::~Linux_UDPSender()
@@ -31,7 +41,7 @@ Linux_UDPSender::~Linux_UDPSender()
     }
 }
 
-int Linux_UDPSender::init_socket(const string& ip, unsigned short port, int type)
+int Linux_UDPSender::init_socket()
 {
     int ret = 0;
 
@@ -40,14 +50,14 @@ int Linux_UDPSender::init_socket(const string& ip, unsigned short port, int type
         return -1;
     }
 
-    if (type == MULTICAST) {
+    if (m_type == MULTICAST) {
         int multicast_ttl = DEFAULT_TTL;
         if (setsockopt(m_socket, IPPROTO_IP, IP_MULTICAST_TTL, (void*)&multicast_ttl, sizeof(multicast_ttl)) < 0) {
             printf("[ERROR] Linux_UDPSender::init_socket() setsockopt failed.\n");
             close(m_socket);
             return -1;
         }
-    } else if (type == BROADCAST) {
+    } else if (m_type == BROADCAST) {
         int broadcast_permission = 1;
         if (setsockopt(m_socket, SOL_SOCKET, SO_BROADCAST, (void*)&broadcast_permission, sizeof(broadcast_permission)) < 0) {
             printf("[ERROR] Linux_UDPSender::init_socket() setsockopt failed.\n");
@@ -58,8 +68,8 @@ int Linux_UDPSender::init_socket(const string& ip, unsigned short port, int type
 
     memset(&m_recvaddr, 0, sizeof(m_recvaddr));
     m_recvaddr.sin_family = AF_INET;
-    m_recvaddr.sin_port = htons(port);
-    if (((m_recvaddr.sin_addr.s_addr = inet_addr(ip.c_str())) == 0)) {
+    m_recvaddr.sin_port = htons(m_port);
+    if (((m_recvaddr.sin_addr.s_addr = inet_addr(m_ip.c_str())) == 0)) {
         printf("[ERROR] Linux_UDPSender::init_socket() invalid address.\n");
         return -1;
     }
