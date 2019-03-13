@@ -13,14 +13,14 @@ public:
 	int getId();
 	int getLength();
 	char* getValue();
-	int setValue(unsigned int start_bit, unsigned int bit_size, char value);
+	void setValue(unsigned int start_bit, unsigned int bit_size, char value);
 
 	int getCmdLength() { return m_length; } 
 	char* getCmd() { return m_cmd; }
 
 private:
 	int m_length;
-	char m_cmd[CMD_BUFLEN];
+	char m_cmd[CMD_BUFLEN]; 
 };
 
 #endif // SIM_CMD_H

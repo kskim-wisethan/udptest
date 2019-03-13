@@ -61,7 +61,7 @@ char* Sim_Cmd::getValue()
     return valuebuf;
 }
 
-int Sim_Cmd::setValue(unsigned int start_bit, unsigned int bit_size, char value)
+void Sim_Cmd::setValue(unsigned int start_bit, unsigned int bit_size, char value)
 {
     int division = (int)(start_bit / 8); 
     int remain = (int)(start_bit % 8);
