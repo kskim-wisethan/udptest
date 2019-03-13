@@ -10,6 +10,8 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
+#include "sim_cmd.h"
+
 using namespace std;
 
 Linux_UDPReceiver::Linux_UDPReceiver(const string& ip, unsigned short port, int type, const string& name)
@@ -37,11 +39,7 @@ Linux_UDPReceiver::Linux_UDPReceiver(const char* ip, unsigned short port, int ty
 Linux_UDPReceiver::~Linux_UDPReceiver()
 {
     if (m_socket != 0) {
-        int ret = close(m_socket);
-        if (ret < 0) {
-            printf("[ERROR] Linux_UDPReceiver::~Linux_UDPReceiver() close failed.\n");
-        }
-        m_socket = 0;
+        close_socket();
     }
 }
 
@@ -111,13 +109,14 @@ int Linux_UDPReceiver::wait_data()
         if (ret > 0) {
             m_readlen = ret;
             recvbuf[m_readlen] = '\0';
-            printf("[%s][%s:%d]: %s (%d)\n", m_name.c_str(), inet_ntoa(m_recvaddr.sin_addr), ntohs(m_recvaddr.sin_port), recvbuf, m_readlen);
+            Sim_Cmd cmdRecv = Sim_Cmd(recvbuf, ret);
+            printf("[%s][0x%X][%s:%d]: %s (%d)\n", m_name.c_str(), cmdRecv.getId(), inet_ntoa(m_recvaddr.sin_addr), ntohs(m_recvaddr.sin_port), recvbuf, m_readlen);
 
             for (int i = 0; i < m_readlen; i++) {
                 if ((i) % 8 == 0 && i != 0) {
                     printf("\n");
                 }
-                printf("0x%02X(%d) ", recvbuf[i], recvbuf[i]);
+                printf("0x%02X(%d) ", (unsigned char)recvbuf[i], recvbuf[i]);
             }
             printf("\n");
         }

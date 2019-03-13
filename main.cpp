@@ -8,9 +8,11 @@
 
 #include "linux_udpsender.h"
 #include "linux_udpreceiver.h"
+#include "sim_cmd.h"
 #include "netAddrInfo.h"
 
 #define INPUT_BUFLEN      4096
+#define CMD_BUFLEN          64
 
 using namespace std;
 
@@ -29,6 +31,7 @@ void* UDPReceiverFunc(void* arg)
 
 int main(int argc, char* argv[])
 {
+    // args
     if (argc < 3) {
         printf("usage: udptest <ip> <port> <uni|multi|broad|sim>\n");
         printf("e.g.,  udptest 10.0.2.0 51914\n");
@@ -53,21 +56,12 @@ int main(int argc, char* argv[])
     }
 
     Linux_UDPSender* sender = new Linux_UDPSender(strIP, port, type);
-    int ret = sender->init_socket();
-    if (ret != 0) {
-        return ret;
-    }
     
     if (type == 4) {
         createSimTestThreads();
 
     } else {
         Linux_UDPReceiver* receiver = new Linux_UDPReceiver(strIP, port, type);
-        ret = receiver->init_socket();
-        if (ret != 0) {
-            return ret;
-        }
-        
         pthread_t hUDPReceiverThread = 0;
         int thread_ret = pthread_create(&hUDPReceiverThread, NULL, &UDPReceiverFunc, (void*)receiver);
         if (thread_ret == 0) {
@@ -79,6 +73,7 @@ int main(int argc, char* argv[])
         }
     }
 
+    // input
     cout << ">> " << endl;
     string strInput = "";
     char buffer[INPUT_BUFLEN] = {0, };
@@ -94,8 +89,20 @@ int main(int argc, char* argv[])
 
         if (strInput.compare("exit") == 0) {
             break;
+        } else if (strInput.compare("crank") == 0) {
+            Sim_Cmd cmd04CA = Sim_Cmd(0x04CA, 8, 6, 2, 0x02);
+            sender->send_data(cmd04CA.getCmd(), cmd04CA.getCmdLength());
+
+            /*
+            Sim_Cmd cmd0411 = Sim_Cmd(0x0411, 8, 22, 2, 0x01);
+            cmd0411.setValue(28, 2, 0x01);
+            cmd0411.setValue(30, 2, 0x01);
+            sender->send_data(cmd0411.getCmd(), cmd0411.getCmdLength());
+            */
+
+        } else {
+            sender->send_data(strInput.c_str(), strInput.length());
         }
-        sender->send_data(strInput.c_str(), strInput.length());
         usleep(0);
     }
     cout << "<< " << endl;

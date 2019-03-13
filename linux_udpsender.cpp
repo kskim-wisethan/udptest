@@ -33,11 +33,7 @@ Linux_UDPSender::Linux_UDPSender(const char* ip, unsigned short port, int type)
 Linux_UDPSender::~Linux_UDPSender()
 {
     if (m_socket != 0) {
-        int ret = close(m_socket);
-        if (ret < 0) {
-            printf("[ERROR] Linux_UDPSender::~Linux_UDPSender() close failed.\n");
-        }
-        m_socket = 0;
+        close_socket();
     }
 }
 
