@@ -1,14 +1,20 @@
 #include "pch.h"
 #include "win32_udpreceiver.h"
 
+#include "sim_cmd.h"
+
 #include <ws2tcpip.h>
 
+using namespace std;
 
-Win32_UDPReceiver::Win32_UDPReceiver()
+Win32_UDPReceiver::Win32_UDPReceiver(const string& ip, unsigned short port, int type, const string& name)
 	: m_waiting_flag(false),
 	m_readlen(0),
 	m_socket(INVALID_SOCKET),
-	m_type(0)
+	m_ip(ip),
+	m_port(port),
+	m_type(type),
+	m_name(name)
 {
 }
 
@@ -19,10 +25,9 @@ Win32_UDPReceiver::~Win32_UDPReceiver()
 	}
 }
 
-int Win32_UDPReceiver::init_socket(const std::string& ip, unsigned short port, int type)
+int Win32_UDPReceiver::init_socket()
 {
 	int ret = 0;
-	m_type = type;
 
 	WSADATA wsadata;
 	ret = WSAStartup(MAKEWORD(2, 2), &wsadata);
@@ -36,7 +41,7 @@ int Win32_UDPReceiver::init_socket(const std::string& ip, unsigned short port, i
 		return -1;
 	}
 
-	if (type == MULTICAST) {
+	if (m_type == MULTICAST) {
 		int reuse_permission = 1;
 		if (setsockopt(m_socket, SOL_SOCKET, SO_REUSEADDR, (char*)&reuse_permission, sizeof(reuse_permission)) < 0) {
 			printf("[ERROR:%d] Win32_UDPReceiver::init_socket() setsockopt 1 failed.\n", WSAGetLastError());
@@ -45,7 +50,7 @@ int Win32_UDPReceiver::init_socket(const std::string& ip, unsigned short port, i
 		}
 	}
 
-	if (type == BROADCAST) {
+	if (m_type == BROADCAST) {
 		int broadcast_permission = 1;
 		if (setsockopt(m_socket, SOL_SOCKET, SO_BROADCAST, (char*)&broadcast_permission, sizeof(broadcast_permission)) < 0) {
 			printf("[ERROR:%d] Win32_UDPReceiver::init_socket() setsockopt 2 failed.\n", WSAGetLastError());
@@ -56,7 +61,7 @@ int Win32_UDPReceiver::init_socket(const std::string& ip, unsigned short port, i
 
 	memset(&m_recvaddr, 0, sizeof(m_recvaddr));
 	m_recvaddr.sin_family = AF_INET;
-	m_recvaddr.sin_port = htons(port);
+	m_recvaddr.sin_port = htons(m_port);
 	m_recvaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
 	if (bind(m_socket, (struct sockaddr*)&m_recvaddr, sizeof(m_recvaddr)) < 0) {
@@ -68,14 +73,15 @@ int Win32_UDPReceiver::init_socket(const std::string& ip, unsigned short port, i
 		return -1;
 	}
 
-	if (type == MULTICAST) {
+	if (m_type == MULTICAST) {
 		struct ip_mreq mreq;
 		in_addr addr;
-		if (inet_pton(AF_INET, ip.c_str(), &addr) != 1) {
+		if (inet_pton(AF_INET, m_ip.c_str(), &addr) != 1) {
 			printf("[ERROR:%d] Win32_UDPReceiver::init_socket() invalid address.\n", WSAGetLastError());
 			close_socket();
 			return -1;
 		}
+
 		mreq.imr_multiaddr = addr;
 		mreq.imr_interface.s_addr = htonl(INADDR_ANY);
 		if (setsockopt(m_socket, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)&mreq, sizeof(mreq)) < 0) {
@@ -105,13 +111,14 @@ int Win32_UDPReceiver::wait_data()
 			recvbuf[m_readlen] = '\0';
 			char addrbuf[DEFAULT_BUFLEN] = { 0, };
 			inet_ntop(AF_INET, &m_recvaddr.sin_addr, addrbuf, DEFAULT_BUFLEN);
-			printf("[%s:%d]: %s (%d)\n", addrbuf, ntohs(m_recvaddr.sin_port), recvbuf, m_readlen);
+			Sim_Cmd cmdRecv = Sim_Cmd(recvbuf, ret);
+			printf("[%s][0x%X][%s:%d]: %s (%d)\n", m_name.c_str(), cmdRecv.getId(), addrbuf, ntohs(m_recvaddr.sin_port), recvbuf, m_readlen);
 
 			for (int i = 0; i < m_readlen; i++) {
 				if ((i) % 8 == 0 && i != 0) {
 					printf("\n");
 				}
-				printf("0x%02X(%d) ", recvbuf[i], recvbuf[i]);
+				printf("0x%02X(%d) ", (unsigned char)recvbuf[i], recvbuf[i]);
 			}
 			printf("\n");
 		}

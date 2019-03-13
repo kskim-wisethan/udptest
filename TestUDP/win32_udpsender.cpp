@@ -6,8 +6,19 @@
 using namespace std;
 
 
-Win32_UDPSender::Win32_UDPSender()
-	: m_socket(INVALID_SOCKET)
+Win32_UDPSender::Win32_UDPSender(const string& ip, unsigned short port, int type)
+	: m_socket(INVALID_SOCKET),
+	  m_ip(ip),
+	  m_port(port),
+	  m_type(type)
+{
+}
+
+Win32_UDPSender::Win32_UDPSender(const char* ip, unsigned short port, int type)
+	: m_socket(INVALID_SOCKET),
+	m_ip(ip),
+	m_port(port),
+	m_type(type)
 {
 }
 
@@ -18,7 +29,7 @@ Win32_UDPSender::~Win32_UDPSender()
 	}
 }
 
-int Win32_UDPSender::init_socket(const string& ip, unsigned short port, int type)
+int Win32_UDPSender::init_socket()
 {
 	int ret = 0;
 
@@ -34,7 +45,7 @@ int Win32_UDPSender::init_socket(const string& ip, unsigned short port, int type
 		return -1;
 	}
 
-	if (type == MULTICAST) {
+	if (m_type == MULTICAST) {
 		int multicast_ttl = DEFAULT_TTL;
 		if (setsockopt(m_socket, IPPROTO_IP, IP_MULTICAST_TTL, (char*)&multicast_ttl, sizeof(multicast_ttl)) < 0) {
 			printf("[ERROR:%d] Win32_UDPSender::init_socket() setsockopt failed.\n", WSAGetLastError());
@@ -42,7 +53,7 @@ int Win32_UDPSender::init_socket(const string& ip, unsigned short port, int type
 			return -1;
 		}
 	}
-	else if (type == BROADCAST) {
+	else if (m_type == BROADCAST) {
 		int broadcast_permission = 1;
 		if (setsockopt(m_socket, SOL_SOCKET, SO_BROADCAST, (char*)&broadcast_permission, sizeof(broadcast_permission)) < 0) {
 			printf("[ERROR:%d] Win32_UDPSender::init_socket() setsockopt failed.\n", WSAGetLastError());
@@ -53,9 +64,9 @@ int Win32_UDPSender::init_socket(const string& ip, unsigned short port, int type
 
 	memset(&m_recvaddr, 0, sizeof(m_recvaddr));
 	m_recvaddr.sin_family = AF_INET;
-	m_recvaddr.sin_port = htons(port);
+	m_recvaddr.sin_port = htons(m_port);
 	in_addr addr;
-	if (inet_pton(AF_INET, ip.c_str(), &addr) != 1) {
+	if (inet_pton(AF_INET, m_ip.c_str(), &addr) != 1) {
 		printf("[ERROR:%d] Win32_UDPSender::init_socket() invalid address.\n", WSAGetLastError());
 		close_socket();
 		return -1;

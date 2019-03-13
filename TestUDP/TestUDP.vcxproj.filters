@@ -30,6 +30,12 @@
     <ClInclude Include="win32_udpreceiver.h">
       <Filter>헤더 파일\udp</Filter>
     </ClInclude>
+    <ClInclude Include="netAddrInfo.h">
+      <Filter>헤더 파일\udp</Filter>
+    </ClInclude>
+    <ClInclude Include="sim_cmd.h">
+      <Filter>헤더 파일\udp</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -42,6 +48,9 @@
       <Filter>소스 파일\udp</Filter>
     </ClCompile>
     <ClCompile Include="win32_udpreceiver.cpp">
+      <Filter>소스 파일\udp</Filter>
+    </ClCompile>
+    <ClCompile Include="sim_cmd.cpp">
       <Filter>소스 파일\udp</Filter>
     </ClCompile>
   </ItemGroup>

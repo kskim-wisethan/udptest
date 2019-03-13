@@ -154,7 +154,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="netAddrInfo.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="sim_cmd.h" />
     <ClInclude Include="win32_udpreceiver.h" />
     <ClInclude Include="win32_udpsender.h" />
   </ItemGroup>
@@ -165,6 +167,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="sim_cmd.cpp" />
     <ClCompile Include="TestUDP.cpp" />
     <ClCompile Include="win32_udpreceiver.cpp" />
     <ClCompile Include="win32_udpsender.cpp" />
