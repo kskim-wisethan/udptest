@@ -56,6 +56,10 @@ int main(int argc, char* argv[])
     }
 
     Linux_UDPSender* sender = new Linux_UDPSender(strIP, port, type);
+    int ret = sender->init_socket();
+    if (ret != 0) {
+        return ret;
+    }
     
     if (type == 4) {
         createSimTestThreads();
@@ -114,6 +118,7 @@ int main(int argc, char* argv[])
 
 void createSimTestThreads()
 {
+    /*
     Linux_UDPReceiver* receiver1 = new Linux_UDPReceiver(UDP_MULTI_IP1, UDP_MULTI_PORT, Linux_UDPReceiver::MULTICAST, "IP1");
     pthread_t hThread1 = 0;
     int thread_ret = pthread_create(&hThread1, NULL, &UDPReceiverFunc, (void*)receiver1);
@@ -149,16 +154,18 @@ void createSimTestThreads()
     } else {
         printf("[FAILED]: cannot create UDPReceiver thread4\n");
     }
+    */
 
-    Linux_UDPReceiver* receiver5 = new Linux_UDPReceiver(UDP_MULTI_IP4, UDP_MULTI_PORT, Linux_UDPReceiver::MULTICAST, "IP5");
+    Linux_UDPReceiver* receiver5 = new Linux_UDPReceiver(UDP_MULTI_IP5, UDP_MULTI_PORT, Linux_UDPReceiver::MULTICAST, "IP5");
     pthread_t hThread5 = 0;
-    thread_ret = pthread_create(&hThread5, NULL, &UDPReceiverFunc, (void*)receiver5);
+    int thread_ret = pthread_create(&hThread5, NULL, &UDPReceiverFunc, (void*)receiver5);
     if (thread_ret == 0) {
         printf("Receiver thread5 created..\n");
     } else {
         printf("[FAILED]: cannot create UDPReceiver thread5\n");
     }
 
+    /*
     Linux_UDPReceiver* receiver6 = new Linux_UDPReceiver(UDP_MULTI_IP6, UDP_MULTI_PORT, Linux_UDPReceiver::MULTICAST, "IP6");
     pthread_t hThread6 = 0;
     thread_ret = pthread_create(&hThread6, NULL, &UDPReceiverFunc, (void*)receiver6);
@@ -239,4 +246,5 @@ void createSimTestThreads()
     } else {
         printf("[FAILED]: cannot create UDPReceiver thread14\n");
     }
+    */
 }

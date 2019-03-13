@@ -9,6 +9,8 @@
 #include <sys/mman.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <string>
+#include <bitset>
 
 #include "sim_cmd.h"
 
@@ -110,15 +112,26 @@ int Linux_UDPReceiver::wait_data()
             m_readlen = ret;
             recvbuf[m_readlen] = '\0';
             Sim_Cmd cmdRecv = Sim_Cmd(recvbuf, ret);
-            printf("[%s][0x%X][%s:%d]: %s (%d)\n", m_name.c_str(), cmdRecv.getId(), inet_ntoa(m_recvaddr.sin_addr), ntohs(m_recvaddr.sin_port), recvbuf, m_readlen);
-
-            for (int i = 0; i < m_readlen; i++) {
-                if ((i) % 8 == 0 && i != 0) {
-                    printf("\n");
+            //printf("[%s][0x%X][%s:%d]: %s (%d)\n", m_name.c_str(), cmdRecv.getId(), inet_ntoa(m_recvaddr.sin_addr), ntohs(m_recvaddr.sin_port), recvbuf, m_readlen);
+            if (cmdRecv.getId() == 0x0411) {
+                printf("[%s:%d][0x%X][%d] \n", m_ip.c_str(), m_port, cmdRecv.getId(), m_readlen);
+                for (int i = 0; i < m_readlen; i++) {
+                    if ((i) % 8 == 0 && i != 0) {
+                        printf("\n");
+                    }
+                    printf("0x%02X(%d) ", (unsigned char)recvbuf[i], recvbuf[i]);
                 }
-                printf("0x%02X(%d) ", (unsigned char)recvbuf[i], recvbuf[i]);
+                printf("\n");
+
+                for (int i = 0; i < m_readlen; i++) {
+                    if ((i) % 8 == 0 && i != 0) {
+                        printf("\n");
+                    }
+                    bitset<8> bits((unsigned char)recvbuf[i]);
+                    printf("%s ", bits.to_string().c_str());
+                }
+                printf("\n");
             }
-            printf("\n");
         }
     }
 
