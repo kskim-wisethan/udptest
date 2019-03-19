@@ -4,6 +4,7 @@
 #include "sim_cmd.h"
 
 #include <ws2tcpip.h>
+#include <bitset>
 
 using namespace std;
 
@@ -119,6 +120,15 @@ int Win32_UDPReceiver::wait_data()
 					printf("\n");
 				}
 				printf("0x%02X(%d) ", (unsigned char)recvbuf[i], recvbuf[i]);
+			}
+			printf("\n");
+
+			for (int i = 0; i < m_readlen; i++) {
+				if ((i) % 8 == 0 && i != 0) {
+					printf("\n");
+				}
+				bitset<8> bits((unsigned char)recvbuf[i]);
+				printf("%s ", bits.to_string().c_str());
 			}
 			printf("\n");
 		}
